@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type {TextSnapshotNode, GeolocationOptions} from '../McpContext.js';
+import {TextSnapshotNode, GeolocationOptions, McpContext} from '../McpContext.js';
 import {zod} from '../third_party/index.js';
 import type {Dialog, ElementHandle, Page} from '../third_party/index.js';
 import type {TraceResult} from '../trace-processing/parse.js';
@@ -12,9 +12,7 @@ import type {PaginationOptions} from '../utils/types.js';
 
 import type {ToolCategory} from './categories.js';
 
-export interface ToolDefinition<
-  Schema extends zod.ZodRawShape = zod.ZodRawShape,
-> {
+export interface ToolDefinition<Schema extends zod.ZodRawShape = zod.ZodRawShape> {
   name: string;
   description: string;
   annotations: {
@@ -29,7 +27,7 @@ export interface ToolDefinition<
   handler: (
     request: Request<Schema>,
     response: Response,
-    context: Context,
+    context: McpContext,
   ) => Promise<void>;
 }
 
@@ -91,6 +89,8 @@ export type Context = Readonly<{
   clearDialog(): void;
   getPageByIdx(idx: number): Page;
   isPageSelected(page: Page): boolean;
+  getSelectedPageIdx(): number;
+  setSelectedPageIdx(pageIdx: number): void;
   newPage(): Promise<Page>;
   closePage(pageIdx: number): Promise<void>;
   selectPage(page: Page): void;

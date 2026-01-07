@@ -336,6 +336,20 @@ export class McpContext implements Context {
     return page;
   }
 
+  getSelectedPageIdx(): number {
+    const selectedPage = this.getSelectedPage();
+    const idx = this.#pages.indexOf(selectedPage);
+    if (idx === -1) {
+      throw new Error('Selected page not found in pages list');
+    }
+    return idx;
+  }
+
+  setSelectedPageIdx(pageIdx: number): void {
+    const page = this.getPageByIdx(pageIdx);
+    this.selectPage(page);
+  }
+
   #dialogHandler = (dialog: Dialog): void => {
     this.#dialog = dialog;
   };

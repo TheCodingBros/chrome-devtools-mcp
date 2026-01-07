@@ -98,6 +98,10 @@ export const cliOptions = {
     conflicts: ['browserUrl', 'wsEndpoint'],
     alias: 'e',
   },
+  extensionPath: {
+    type: 'string',
+    description: 'Path to unpacked Chrome extension.',
+  },
   isolated: {
     type: 'boolean',
     description:

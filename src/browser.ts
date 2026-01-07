@@ -22,7 +22,6 @@ let browser: Browser | undefined;
 function makeTargetFilter() {
   const ignoredPrefixes = new Set([
     'chrome://',
-    'chrome-extension://',
     'chrome-untrusted://',
   ]);
 
@@ -135,6 +134,7 @@ interface McpLaunchOptions {
   executablePath?: string;
   channel?: Channel;
   userDataDir?: string;
+  extensionPath?: string;
   headless: boolean;
   isolated: boolean;
   logFile?: fs.WriteStream;
@@ -147,7 +147,7 @@ interface McpLaunchOptions {
 }
 
 export async function launch(options: McpLaunchOptions): Promise<Browser> {
-  const {channel, executablePath, headless, isolated} = options;
+  const {channel, executablePath, headless, isolated, extensionPath} = options;
   const profileDirName =
     channel && channel !== 'stable'
       ? `chrome-profile-${channel}`
@@ -173,6 +173,17 @@ export async function launch(options: McpLaunchOptions): Promise<Browser> {
   if (headless) {
     args.push('--screen-info={3840x2160}');
   }
+
+  args.push(`--user-data-dir=${userDataDir}`);
+
+  if (extensionPath) {
+    // Add extension loading support
+    logger(`loading extension path ${extensionPath}`);
+    args.push('--no-first-run');
+    args.push(`--load-extension=${extensionPath}`);
+    args.push('--enable-features=ExtensionDeveloperModeWarning');
+  }
+
   let puppeteerChannel: ChromeReleaseChannel | undefined;
   if (options.devtools) {
     args.push('--auto-open-devtools-for-tabs');
@@ -186,6 +197,7 @@ export async function launch(options: McpLaunchOptions): Promise<Browser> {
 
   try {
     const browser = await puppeteer.launch({
+      ignoreDefaultArgs: true,
       channel: puppeteerChannel,
       targetFilter: makeTargetFilter(),
       executablePath,
