@@ -236,12 +236,31 @@ export async function launch(options: McpLaunchOptions): Promise<Browser> {
       userDataDir &&
       (error as Error).message.includes('The browser is already running')
     ) {
-      throw new Error(
-        `The browser is already running for ${userDataDir}. Use --isolated to run multiple browser instances.`,
-        {
-          cause: error,
-        },
-      );
+      // Browser is already running, try to connect to it
+      logger(`Browser already running for ${userDataDir}, attempting to connect...`);
+
+      // Check if a specific remote debugging port was specified in args
+      const debugPortArg = args.find(arg => arg.startsWith('--remote-debugging-port='));
+      const debugPort = debugPortArg ? parseInt(debugPortArg.split('=')[1], 10) : undefined;
+
+      try {
+        const connectedBrowser = await ensureBrowserConnected({
+          browserURL: debugPort ? `http://localhost:${debugPort}` : undefined,
+          userDataDir: debugPort ? undefined : userDataDir,
+          devtools: options.devtools,
+          channel: options.channel,
+        });
+        logger('Successfully connected to existing browser');
+        return connectedBrowser;
+      } catch (connectError) {
+        logger(`Failed to connect to existing browser:`, connectError);
+        throw new Error(
+          `The browser is already running for ${userDataDir}. Use --isolated to run multiple browser instances.`,
+          {
+            cause: error,
+          },
+        );
+      }
     }
     throw error;
   }
