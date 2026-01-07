@@ -182,6 +182,9 @@ export async function launch(options: McpLaunchOptions): Promise<Browser> {
     args.push('--no-first-run');
     args.push(`--load-extension=${extensionPath}`);
     args.push('--enable-features=ExtensionDeveloperModeWarning');
+    args.push('--enable-automation');
+    args.push('--no-default-browser-check');
+    args.push('--disable-background-networking');
   }
 
   let puppeteerChannel: ChromeReleaseChannel | undefined;
