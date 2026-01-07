@@ -185,6 +185,7 @@ export async function launch(options: McpLaunchOptions): Promise<Browser> {
     args.push('--enable-automation');
     args.push('--no-default-browser-check');
     args.push('--disable-background-networking');
+    args.push('--remote-debugging-port=9222');
   }
 
   let puppeteerChannel: ChromeReleaseChannel | undefined;
@@ -198,6 +199,9 @@ export async function launch(options: McpLaunchOptions): Promise<Browser> {
         : 'chrome';
   }
 
+  // Check if a remote debugging port is specified in args
+  const hasDebugPort = args.some(arg => arg.includes('--remote-debugging-port'));
+
   try {
     const browser = await puppeteer.launch({
       ignoreDefaultArgs: true,
@@ -206,7 +210,7 @@ export async function launch(options: McpLaunchOptions): Promise<Browser> {
       executablePath,
       defaultViewport: null,
       userDataDir,
-      pipe: true,
+      pipe: !hasDebugPort, // Use port-based debugging if --remote-debugging-port is specified
       headless,
       args,
       acceptInsecureCerts: options.acceptInsecureCerts,
